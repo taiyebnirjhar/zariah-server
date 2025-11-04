@@ -1,0 +1,2 @@
+# checking if the commit message is following the conventional commit format
+npx --no-install commitlint --edit "$1"
