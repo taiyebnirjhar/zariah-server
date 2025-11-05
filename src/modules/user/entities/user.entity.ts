@@ -1,11 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsString } from 'class-validator';
-
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-}
+import { IsEmail, IsString } from 'class-validator';
 
 @Schema({
   timestamps: true,
@@ -28,79 +23,38 @@ export class User {
   @IsString()
   email: string;
 
+  // Swagger
+
   @ApiProperty({
-    description: 'First name of the user',
-    required: false,
+    description: 'Name of the user',
+    required: true,
     type: String,
     example: 'John',
   })
-  @Prop({
-    type: String,
-  })
-  @IsString()
-  firstName: string;
 
-  @ApiProperty({
-    description: 'Last name of the user',
-    required: false,
-    type: String,
-    example: 'Doe',
-  })
+  // mongoose
   @Prop({
+    trim: true,
     type: String,
+    required: [true, 'Name is required'],
   })
-  @IsString()
-  lastName: string;
 
-  @ApiProperty({
-    description: 'Profile image URL of the user',
-    required: false,
-    type: String,
-    example: 'https://example.com/image.jpg',
-  })
-  @Prop({
-    type: String,
-  })
+  // type definition
   @IsString()
-  image?: string;
+  name: string;
 
   @ApiProperty({
     description: 'Hashed password of the user',
-    required: false,
+    required: true,
     type: String,
   })
   @Prop({
+    trim: true,
     type: String,
+    required: [true, 'Password is required'],
   })
   @IsString()
-  password?: string;
-
-  @ApiProperty({
-    description: 'Role of the user',
-    required: true,
-    enum: UserRole,
-    default: UserRole.USER,
-    example: UserRole.USER,
-  })
-  @Prop({
-    type: String,
-    enum: UserRole,
-    required: true,
-    default: UserRole.USER,
-  })
-  @IsEnum(UserRole)
-  role: UserRole;
-
-  @ApiProperty({
-    description: 'Refresh token for authentication',
-    required: false,
-    type: String,
-  })
-  @Prop({
-    type: String,
-  })
-  @IsString()
-  refreshToken?: string;
+  password: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

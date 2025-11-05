@@ -1,4 +1,5 @@
 import { Environment, EnvironmentKey } from '@/config';
+import { IApiResponse } from '@/type/api-response.type';
 import {
   ArgumentsHost,
   BadRequestException,
@@ -63,7 +64,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       stack = exception.stack;
     }
 
-    const errorResponse = {
+    const errorResponse: IApiResponse = {
       success: false,
       message,
       path: request.url,

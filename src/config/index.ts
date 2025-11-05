@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { defaultEnvValues } from '@/config/defaultEnvValues';
 import { getDescription } from '@/decorators/description.decorator';
 import { Logger } from '@nestjs/common';
@@ -6,7 +7,6 @@ import { plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsNumber,
-  IsOptional,
   IsString,
   Max,
   Min,
@@ -36,22 +36,6 @@ class EnvironmentVariables {
 
   @IsString()
   JWT_SECRET: string = defaultEnvValues.JWT_SECRET;
-
-  @IsString()
-  REDIS_HOST: string = defaultEnvValues.REDIS_HOST;
-
-  @IsNumber()
-  @Min(0)
-  @Max(65535)
-  REDIS_PORT: number = defaultEnvValues.REDIS_PORT;
-
-  @IsString()
-  @IsOptional()
-  REDIS_USERNAME?: string = defaultEnvValues.REDIS_USERNAME;
-
-  @IsString()
-  @IsOptional()
-  REDIS_PASSWORD?: string = defaultEnvValues.REDIS_PASSWORD;
 
   @IsString()
   JWT_EXPIRATION: string = defaultEnvValues.JWT_EXPIRATION;
@@ -91,14 +75,14 @@ export function validateEnv(config: Record<string, unknown>) {
     console.error(
       'Environment variable validation failed. Generating .env.example...',
     );
-    generateEnvExample();
+    // generateEnvExample();
     throw new Error(
       errors
         .map((err) => Object.values(err.constraints || {}).join(', '))
         .join('\n'),
     );
   } else {
-    generateEnvExample();
+    // generateEnvExample();
   }
 
   return validatedConfig;
