@@ -1,8 +1,10 @@
 import { AppLoggerService } from '@/modules/logger/logger.service';
-import { Injectable } from '@nestjs/common';
+import { IQueryFeatures } from '@/type/query-features.type';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { QueryBuilder } from '../mongodb/query-builder';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -23,21 +25,42 @@ export class UserService {
     return await createdUser.save();
   }
 
-  findAll() {
-    const res = this.userModel.find().lean();
-    return res;
+  async findAll(queryFeatures: IQueryFeatures) {
+    const queryBuilder = new QueryBuilder<User>(this.userModel, queryFeatures, {
+      searchFields: ['name', 'email'] as (keyof User)[],
+    });
+
+    const result = await queryBuilder.execute();
+
+    return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string, query: IQueryFeatures) {
+    const select =
+      Object.keys(query.fields)?.length > 0
+        ? {
+            ...query.fields,
+            organizationId: 1,
+          }
+        : {};
+    const user = await this.userModel
+      .findOne({
+        _id: new Types.ObjectId(id),
+      })
+      .select(select);
+
+    if (!user) {
+      throw new NotFoundException('user not found!');
+    }
+
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    console.log(updateUserDto);
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    await this.userModel.findByIdAndUpdate(id, updateUserDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    await this.userModel.findByIdAndDelete(id);
   }
 }

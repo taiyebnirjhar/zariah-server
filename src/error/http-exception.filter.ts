@@ -58,6 +58,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message = (exception.getResponse() as any)?.message;
       stack = exception.stack;
 
+      // ----- Handle Mongoose Duplicate Key Error
+    } else if ((exception as any).code === 11000) {
+      status = HttpStatus.CONFLICT;
+      const keyPattern = (exception as any).keyPattern;
+      const keyValue = (exception as any).keyValue;
+      const duplicateField = keyPattern
+        ? Object.keys(keyPattern)[0]
+        : 'unknown field';
+      const duplicateValue = keyValue
+        ? keyValue[duplicateField]
+        : 'unknown value';
+      message = `${duplicateField} with value ${duplicateValue} already exists`;
+      stack = (exception as any).stack;
+
       // ----- Handle Error
     } else if (exception instanceof Error) {
       message = exception.message;

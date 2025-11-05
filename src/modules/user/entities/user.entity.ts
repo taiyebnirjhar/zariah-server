@@ -55,6 +55,26 @@ export class User {
   })
   @IsString()
   password: string;
+
+  // @ApiProperty({
+  //   description: 'Organization ID the user belongs to',
+  //   required: true,
+  //   type: String,
+  //   example: '64a7b2f5c2a3e5d6f7g8h9i0',
+  // })
+  // @Prop({
+  //   type: String,
+  //   required: [true, 'Organization ID is required'],
+  // })
+  // @IsString()
+  // organizationId: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// UserSchema.virtual('organization' , {
+//   ref: 'Organization',
+//   localField: 'organizationId',
+//   foreignField: '_id',
+//   justOne: true,
+// })

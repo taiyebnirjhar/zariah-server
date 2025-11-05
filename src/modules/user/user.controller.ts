@@ -1,4 +1,10 @@
+import {
+  QueryFeatureMultiple,
+  QueryFeatureSingle,
+} from '@/decorators/query-feature.decorator';
+import { SwaggerGetMultipleQueryParams } from '@/decorators/sweggers.decorators';
 import { IApiResponse } from '@/type/api-response.type';
+import { IQueryFeatures } from '@/type/query-features.type';
 import {
   Body,
   Controller,
@@ -11,7 +17,7 @@ import {
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { User, UserSchema } from './entities/user.entity';
 import { UserService } from './user.service';
 
 @ApiTags('User')
@@ -39,23 +45,45 @@ export class UserController {
     };
   }
 
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({
+    status: 200,
+    description: 'The users have been successfully retrieved.',
+    type: [User],
+  })
+  @SwaggerGetMultipleQueryParams(UserSchema, ['password'])
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll(
+    @QueryFeatureMultiple() queryFeatures: IQueryFeatures,
+  ): Promise<IApiResponse<User[]>> {
+    const res = await this.userService.findAll(queryFeatures);
+    return {
+      success: true,
+      message: 'Users retrieved successfully',
+      data: res.data,
+      meta: {
+        total: res.total,
+        page: queryFeatures.page || 1,
+        limit: queryFeatures.limit || res.total,
+      },
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  findOne(
+    @Param('id') id: string,
+    @QueryFeatureSingle() queryFeatures: IQueryFeatures,
+  ) {
+    return this.userService.findOne(id, queryFeatures);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.remove(id);
   }
 }
